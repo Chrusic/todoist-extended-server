@@ -166,6 +166,10 @@ const CREATE_TASK_TOOL: Tool = {
       section_id: {
         type: "string",
         description: "ID of the section to add the task to (optional)"
+      },
+      assignee_id: {
+        type: "string",
+        description: "ID of the assignee to add the task to (optional)"
       }
     },
     required: ["content"]
@@ -433,6 +437,7 @@ function isCreateTaskArgs(args: unknown): args is {
   priority?: number;
   project_id?: string;
   section_id?: string;
+  assigne_id?: string;
 } {
   return (
     typeof args === "object" &&
@@ -445,6 +450,7 @@ function isCreateTaskArgs(args: unknown): args is {
 function isGetTasksArgs(args: unknown): args is {
   project_id?: string;
   section_id?: string;
+  assignee_id?: string;
   filter?: string;
   priority?: number;
   limit?: number;
@@ -460,6 +466,7 @@ function isUpdateTaskArgs(args: unknown): args is {
   content?: string;
   description?: string;
   due_string?: string;
+  assignee_id?: string;
   priority?: number;
   project_id?: string;
   section_id?: string;
@@ -797,12 +804,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         dueString: args.due_string,
         priority: args.priority,
         projectId: args.project_id,
-        sectionId: args.section_id
+        sectionId: args.section_id,
+        assigneeId: args.assignee_id,
       });
       return {
         content: [{
           type: "text",
-          text: `Task created:\nTitle: ${task.content}${task.description ? `\nDescription: ${task.description}` : ''}${task.due ? `\nDue: ${task.due.string}` : ''}${task.priority ? `\nPriority: ${task.priority}` : ''}${task.projectId ? `\nProject ID: ${task.projectId}` : ''}${task.sectionId ? `\nSection ID: ${task.sectionId}` : ''}`
+          text: `Task created:\nTitle: ${task.content}${task.description ? `\nDescription: ${task.description}` : ''}${task.due ? `\nDue: ${task.due.string}` : ''}${task.priority ? `\nPriority: ${task.priority}` : ''}${task.projectId ? `\nProject ID: ${task.projectId}` : ''}${task.sectionId ? `\nSection ID: ${task.sectionId}` : ''}${task.assigneeId ? `\nAssignee ID: ${task.assigneeId}` : ''}`
         }],
         isError: false,
       };
@@ -833,6 +841,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Apply priority filter
         if (args.priority) {
           filteredTasks = filteredTasks.filter(task => task.priority === args.priority);
+        }
+
+        // Apply assignee filter
+        if (args.assignee) {
+          filteredTasks = filteredTasks.filter(task => task.assignee === args.assignee);
         }
     
         // Apply custom filter if provided
@@ -873,6 +886,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }
           if (task.sectionId) {
             taskInfo += `\n  Section ID: ${task.sectionId}`;
+          }
+          if (task.assigneeId) {
+            taskInfo += `\n  Assignee ID: ${task.assigneeId}`;
           }
           
           return taskInfo;
@@ -927,6 +943,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       if (args.priority) updateData.priority = args.priority;
       if (args.project_id) updateData.projectId = args.project_id;
       if (args.section_id) updateData.sectionId = args.section_id;
+      if (args.assignee_id) pdateData.assigneeId = args.assignee_id;
 
       const updatedTask = await todoistClient.updateTask(matchingTask.id, updateData);
 
