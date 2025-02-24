@@ -190,6 +190,10 @@ const GET_TASKS_TOOL: Tool = {
         type: "string",
         description: "Filter tasks by section ID (optional)"
       },
+      assignee_id: {
+        type: "string",
+        description: "Filter tasks by assignee ID (optional)"
+      },
       filter: {
         type: "string",
         description: "Natural language filter like 'today', 'tomorrow', 'next week', 'priority 1', 'overdue' (optional)"
@@ -242,6 +246,10 @@ const UPDATE_TASK_TOOL: Tool = {
       section_id: {
         type: "string",
         description: "Move task to this section ID (optional)"
+      },
+      assignee_id: {
+        type: "string",
+        description: "Re-assign task to this assignee ID (optional)"
       }
     },
     required: ["task_name"]
